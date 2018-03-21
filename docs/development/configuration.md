@@ -68,6 +68,12 @@ Will be converted accordingly to:
 
 However it is strongly recommended to use `$name` in your output template, as `out.js` will be ignored
 
+## stdin
+
+Listens to stdin.
+
+Combinations like `CMD+D` will gracefully shut down any process.
+
 ## Cache
 
 You can turn off caching if you like. By default caching is on. FuseBox will create a folder `.fusebox` in your project path, and store related files. Don't forget to add it to .gitignore.
@@ -90,17 +96,39 @@ fuse.bundle("app")
     .instructions("> index.ts")
 ```
 
-## Debug and Log
-Additional logging and debugging can be enabled, but keep in mind they can reduce performance.
+## Debug
+
+Additional debugging can be enabled, but keep in mind they can reduce performance.
 ```js
 const fuse = FuseBox.init({
   homeDir: "src",
   output: "build/$name.js",
-  log: true,
   debug: true
 })
 ```
 
+## Log
+
+Log output can be customized using the `log` option:
+```js
+const fuse = FuseBox.init({
+  log: {
+      showBundledFiles: false, // Don't list all the bundled files every time we bundle
+      clearTerminalOnBundle: true, // Clear the terminal window every time we bundle
+  }
+})
+```
+
+These options are useful for seeing only the things you are interested in when developing incrementally using `.watch`.
+
+You can also disable logging completely:
+```js
+const fuse = FuseBox.init({
+  log: {
+      enabled: false
+  }
+})
+```
 
 ## Custom modules folder
 
@@ -405,6 +433,15 @@ FuseBox.init({
     sourceMaps: true
 })
 ```
+
+If you want to customize the location of inlined source maps provide the following option
+
+```js
+FuseBox.init({
+    inlineCSSPath : "client/css-resources/maps"
+})
+```
+
 
 You can also provide an object to the `sourceMaps` property and then choose between project _and_ vendor sourcemaps:
 

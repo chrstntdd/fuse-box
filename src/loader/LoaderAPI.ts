@@ -7,7 +7,7 @@ declare let __fbx__dnm__: any;
 declare const WorkerGlobalScope: any;
 
 const $isWebWorker = typeof WorkerGlobalScope !== "undefined";
-const $isBrowser = typeof window !== "undefined" && window.navigator || $isWebWorker;
+const $isBrowser = typeof window !== "undefined" && typeof window.navigator !== "undefined" || $isWebWorker;
 const g = $isBrowser ? ($isWebWorker ? {} : window) : global;
 
 
@@ -394,9 +394,9 @@ function $trigger(name: string, args: any) {
 };
 
 function syntheticDefaultExportPolyfill(input){
-    return ['function', 'object', 'array']
+    return input !== null && ['function', 'object', 'array']
         .indexOf(typeof input) > -1 && input.default === undefined ?
-             Object.isFrozen(input) ? input.default = input : Object.defineProperty(input, "default", {value : input, enumerable : false}) : void 0;
+             Object.isFrozen(input) ? input.default = input : Object.defineProperty(input, "default", {value : input, writable : true, enumerable : false}) : void 0;
 }
 
 /**

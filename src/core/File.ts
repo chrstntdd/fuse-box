@@ -6,7 +6,7 @@ import { SourceMapGenerator } from "./SourceMapGenerator";
 import { utils, each } from "realm-utils";
 import * as fs from "fs";
 import * as path from "path";
-import { ensureFuseBoxPath, readFuseBoxModule, isStylesheetExtension } from "../Utils";
+import { ensureFuseBoxPath, readFuseBoxModule, isStylesheetExtension, fastHash, joinFuseBoxPath } from "../Utils";
 
 /**
  * Same Target Enumerator used in TypeScript
@@ -612,11 +612,31 @@ export class File {
     public transpileUsingTypescript(){
         try {
             const ts = require("typescript");
-            return ts.transpileModule(this.contents, this.getTranspilationConfig());
+	    try {
+                return ts.transpileModule(this.contents, this.getTranspilationConfig());
+	    } catch(e) {
+	        this.context.fatal(`${this.info.absPath}: ${e}`);
+                return;
+	    }
         } catch(e){
             this.context.fatal('You need TypeScript installed to transpile modules automatically');
             return;
         }
+    }
+
+    public generateInlinedCSS(){
+        const re = /(\/*#\s*sourceMappingURL=\s*)([^\s]+)(\s*\*\/)/g
+        const newName = joinFuseBoxPath("/", this.context.inlineCSSPath, `${fastHash(this.info.fuseBoxPath)}.map`)
+        this.contents = this.contents.replace(re, `$1${newName}$3`);
+        this.context.output.writeToOutputFolder(newName, this.sourceMap)
+        if( this.context.fuse && this.context.fuse.producer ){
+            const producer = this.context.fuse.producer;
+            producer.sharedSourceMaps.set(this.info.fuseBoxPath, this.sourceMap);
+        }
+    }
+
+    public getCorrectSourceMapPath(){
+        return this.context.sourceMapsRoot + "/" + this.relativePath;
     }
     /**
      *
@@ -644,12 +664,10 @@ export class File {
         if (result.sourceMapText && this.context.useSourceMaps) {
             let jsonSourceMaps = JSON.parse(result.sourceMapText);
             jsonSourceMaps.file = this.info.fuseBoxPath;
-            jsonSourceMaps.sources = [this.context.sourceMapsRoot + "/" + this.relativePath.replace(/\.js(x?)$/, ".ts$1")];
-
+            jsonSourceMaps.sources = [this.getCorrectSourceMapPath().replace(/\.js(x?)$/, ".ts$1")];
             if (!this.context.inlineSourceMaps) {
                 delete jsonSourceMaps.sourcesContent;
 			}
-			
             result.outputText = result
                 .outputText
                 .replace(`//# sourceMappingURL=${this.info.fuseBoxPath}.map`, `//# sourceMappingURL=${this.context.bundle.name}.js.map`)

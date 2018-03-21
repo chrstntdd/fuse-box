@@ -28,16 +28,49 @@ These options define the API, for example, if you choose `browser` the API will 
 note: With an `npm` target, `bakeApiIntoBundle` should be used and `containedAPI` should be `true`. Also, no vendor should be produced while the bundle is specified with the `[ ]` arithmetics to avoid bundling dependencies.
 
 ## bakeApiIntoBundle
-Instead of creating a separate file with the api, you can chose to bake it into an existing bundle.
+Instead of creating a separate file with the api, you can chose to bake it into an existing bundle(s).
 
 note: A bundle name should match your registered bundle name in the producer.
 
+possible values:
+- string: name of single bundle to bake api into
+- string[]: names of multiple bundles to bake api into
+- true: bake api into every bundle
+
 ```js
 QuantumPlugin({
-    bakeApiIntoBundle : 'app'
+    bakeApiIntoBundle : 'app' // | ['app', 'second'] | true
 })
 ```
 
+## definedExpressions
+
+If you are planning to set up process.env, you should use [EnvPlugin](/page/env-plugin) instead
+```js
+QuantumPlugin({
+    definedExpressions: {
+        'foo.bar' : 'foo'
+    }
+})
+```
+
+In this case, Quantum will be aware of `foo.bar` member expression, which will result in dead code elimination (like process.env)
+
+For example:
+
+
+```js
+if ( foo.bar === "foo" ) {
+  console.log("i am foo")
+} else {
+  console.log("i am not foo")
+}
+```
+
+The result will look like:
+```js
+console.log("I am foo")
+```
 
 ## polyfills
 
@@ -54,6 +87,33 @@ QuantumPlugin({
 | ------------- | -------------
 | Promise  | [Promise](https://github.com/fuse-box/fuse-box/blob/master/modules/fuse-box-responsive-api/promise-polyfill.js) polyfill (for IE)
 
+## css
+
+Quantum can extract your inlined css, group, optimize, minify and store everything to the file system
+
+```js
+QuantumPlugin({css: true})
+```
+
+Quantum uses [clean-sss](https://github.com/jakubpawlowicz/clean-css) module to optimize CSS. You can provide options by passing an object
+
+```js
+QuantumPlugin({css: { clean : true }})
+// or
+QuantumPlugin({css: { clean : { compatibility : {}} }})
+```
+
+If you want to customise the file location, provide the following options
+
+```js
+QuantumPlugin({
+    css: {
+        path : "client/css-resources/styles.min.css"
+    }
+})
+// or
+QuantumPlugin({css: { clean : { compatibility : {}} }})
+```
 
 
 ## containedAPI

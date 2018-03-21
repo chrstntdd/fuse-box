@@ -20,7 +20,7 @@ export type Concat = {
 export type ConcatModule = {
     new(generateSourceMap: boolean, outputFileName: string, seperator: string): Concat;
 };
-export const Concat: ConcatModule = require("concat-with-sourcemaps");
+export const Concat: ConcatModule = require("fuse-concat-with-sourcemaps");
 
 export function contains(array: any[], obj: any) {
     return array && array.indexOf(obj) > -1;
@@ -229,7 +229,11 @@ export function fastHash(text: string) {
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash; // Convert to 32bit integer
     }
-    return hash.toString(16);
+    let result = hash.toString(16).toString();
+    if( result.charAt(0) === '-'){
+        result = result.replace(/-/, '0');
+    }
+    return result;
 }
 export function extractExtension(str: string) {
     const result = str.match(/\.([a-z0-9]+)\$?$/);
@@ -240,6 +244,11 @@ export function extractExtension(str: string) {
 }
 export function ensureFuseBoxPath(input: string) {
     return input.replace(/\\/g, "/").replace(/\/$/, "");
+}
+export function ensureCorrectBundlePath(input : string){
+    input = ensureFuseBoxPath(input);
+    input = ensurePublicExtension(input);
+    return input;
 }
 
 export function transpileToEs5(contents: string) {

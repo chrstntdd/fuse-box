@@ -16,7 +16,9 @@ export class BundleProducer {
     public hmrInjected = false;
     public hmrAllowed = true;
     public allowSyntheticDefaultImports = false;
-    public devServer : Server;
+    public sharedSourceMaps = new Map<string, string>();
+    public injectedCSSFiles = new Set<string>();
+    public devServer: Server;
     public sharedEvents = new EventEmitter();
     public writeBundles = true;
     public sharedCustomPackages: Map<string, SharedCustomPackage​>;

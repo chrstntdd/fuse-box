@@ -94,10 +94,11 @@ export class VueComponentClass implements Plugin {
 
   public bundleEnd(context: WorkFlowContext) {
     if (context.useCache && this.hasProcessedVueFile) {
-      context.source.addContent(`
-        var process = FuseBox.import('process');
-
-        if (process.env.NODE_ENV !== "production") {
+      const hasGlobal = context.isGlobalyIgnored('process')
+      const process = hasGlobal ? 'global.process' : 'process'
+      const importProcess = hasGlobal ? '' : 'var process = FuseBox.import(\'process\');\n\n'
+      context.source.addContent(`${importProcess}
+        if (${process}.env.NODE_ENV !== "production") {
           var api = FuseBox.import('vue-hot-reload-api');
           var Vue = FuseBox.import('vue');
 
@@ -261,16 +262,14 @@ export class VueComponentClass implements Plugin {
     }
 
     if (file.context.useCache) {
-      concat.add(null, `
-        var process = FuseBox.import('process');
-
-        if (process.env.NODE_ENV !== "production") {
+      const hasGlobal = file.context.isGlobalyIgnored('process')
+      const process = hasGlobal ? 'global.process' : 'process'
+      const importProcess = hasGlobal ? '' : 'var process = FuseBox.import(\'process\');\n\n'
+      concat.add(null, `${importProcess}
+        if (${process}.env.NODE_ENV !== "production") {
           var api = require('vue-hot-reload-api');
 
-          process.env.vueHMR = process.env.vueHMR || {};
-
-          if (!process.env.vueHMR['${moduleId}']) {
-            process.env.vueHMR['${moduleId}'] = true;
+          if (api && !api.isRecorded('${moduleId}')) {
             api.createRecord('${moduleId}', module.exports.default);
           }
         }

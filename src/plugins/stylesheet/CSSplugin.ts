@@ -173,7 +173,7 @@ export class CSSPluginClass implements Plugin {
      *
      * @memberOf FuseBoxCSSPlugin
      */
-    public transform(file: File) {
+    public async transform(file: File) {
         if (!file.context.sourceMapsProject) {
             file.sourceMap = undefined;
         }
@@ -249,12 +249,14 @@ export class CSSPluginClass implements Plugin {
                     const sourceMapPath = path.join(fileDir,
                         path.basename(utouchedPath) + ".map");
                     return write(sourceMapPath, file.sourceMap).then(() => {
-
                         file.sourceMap = undefined;
                     });
                 }
             });
         } else {
+            if (file.sourceMap && file.context.useSourceMaps) {
+                file.generateInlinedCSS();
+            }
             let safeContents = JSON.stringify(file.contents);
             file.sourceMap = undefined;
 
