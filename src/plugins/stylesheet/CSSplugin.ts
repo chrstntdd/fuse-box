@@ -10,6 +10,7 @@ export interface CSSPluginOptions {
     inject?: boolean | { (file: string): string }
     group?: string;
     minify?: boolean;
+    replace?: any
 }
 
 const ensureCSSExtension = (file: File | string): string => {
@@ -36,6 +37,7 @@ export class CSSPluginClass implements Plugin {
      */
     public test: RegExp = /\.css$/;
     private minify = false;
+    private replaceMap = null;
     public options: CSSPluginOptions;
 
     public dependencies: ["fuse-box-css"];
@@ -45,6 +47,10 @@ export class CSSPluginClass implements Plugin {
 
         if (opts.minify !== undefined) {
             this.minify = opts.minify;
+        }
+
+        if (opts.replace !== undefined) {
+            this.replaceMap = opts.replace;
         }
     }
 
@@ -132,14 +138,14 @@ export class CSSPluginClass implements Plugin {
         if (bundle && bundle.lastChangedFile) {
             const lastFile = file.context.convertToFuseBoxPath(bundle.lastChangedFile);
             if (isStylesheetExtension(bundle.lastChangedFile)) {
-              if (lastFile === file.info.fuseBoxPath ||
-                  file.context.getItem("HMR_FILE_REQUIRED", []).indexOf(file.info.fuseBoxPath) > -1) {
-                  emitRequired = true;
-              }
+                if (lastFile === file.info.fuseBoxPath ||
+                    file.context.getItem("HMR_FILE_REQUIRED", []).indexOf(file.info.fuseBoxPath) > -1) {
+                    emitRequired = true;
+                }
 
-              if (file.subFiles.find((subFile) => subFile.info.fuseBoxPath === bundle.lastChangedFile)) {
-                emitRequired = true;
-              }
+                if (file.subFiles.find((subFile) => subFile.info.fuseBoxPath === bundle.lastChangedFile)) {
+                    emitRequired = true;
+                }
             }
         }
 
@@ -180,6 +186,8 @@ export class CSSPluginClass implements Plugin {
         const debug = (text: string) => file.context.debugPlugin(this, text);
 
         file.loadContents();
+
+        file.contents = this.replaceMap ? this.replaceContents(file.contents) : file.contents;
 
         let filePath = file.info.fuseBoxPath;
 
@@ -259,6 +267,12 @@ export class CSSPluginClass implements Plugin {
 
     private minifyContents(contents) {
         return contents.replace(/\s{2,}/g, " ").replace(/\t|\r|\n/g, "").trim();
+    }
+
+    private replaceContents(contents) {
+        for (const key in this.replaceMap) {
+            return contents.replace(key, this.replaceMap[key]);
+        }
     }
 }
 
