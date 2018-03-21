@@ -22,282 +22,282 @@ const makeTestFolder = () => {
 };
 
 export class CssPluginTest {
-        "Should require and inline a simple CSS File"() {
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "body {}",
-                    },
-                    plugins: [CSSPlugin()],
-                    instructions: "> index.ts",
+    "Should require and inline a simple CSS File"() {
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "body {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                should(js).findString(`require("fuse-box-css")("main.css", "body {}")`);
-            });
-        }
+                plugins: [CSSPlugin()],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            should(js).findString(`require("fuse-box-css")("main.css", "body {}")`);
+        });
+    }
 
-        "Should require and create a simple CSS File"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "body {}",
-                    },
-                    plugins: [
-                        CSSPlugin({
-                            outFile: (file) => `${tmp}/${file}`,
-                        }),
-                    ],
-                    instructions: "> index.ts",
+    "Should require and create a simple CSS File"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "body {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("main.css");
-                should(js).findString(`require("fuse-box-css")("main.css");`);
-            });
-        }
+                plugins: [
+                    CSSPlugin({
+                        outFile: (file) => `${tmp}/${file}`,
+                    }),
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("main.css");
+            should(js).findString(`require("fuse-box-css")("main.css");`);
+        });
+    }
 
-        "Should create a CSS File but not inject it"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "h1 {}",
-                    },
-                    plugins: [
-                        CSSPlugin({
-                            outFile: (file) => `${tmp}/${file}`,
-                            inject: false,
-                        }),
-                    ],
-                    instructions: "> index.ts",
+    "Should create a CSS File but not inject it"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "h1 {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("main.css");
-                should(js).notFindString(`require("fuse-box-css")("main.css");`);
-            });
-        }
+                plugins: [
+                    CSSPlugin({
+                        outFile: (file) => `${tmp}/${file}`,
+                        inject: false,
+                    }),
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("main.css");
+            should(js).notFindString(`require("fuse-box-css")("main.css");`);
+        });
+    }
 
-        "Should create a CSS File and inject it with inject:true"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "h1 {}",
-                    },
-                    plugins: [
-                        CSSPlugin({
-                            outFile: (file) => `${tmp}/${file}`,
-                            inject: true,
-                        }),
-                    ],
-                    instructions: "> index.ts",
+    "Should create a CSS File and inject it with inject:true"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "h1 {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("main.css");
-                should(js).findString(`require("fuse-box-css")("main.css");`);
-            });
-        }
+                plugins: [
+                    CSSPlugin({
+                        outFile: (file) => `${tmp}/${file}`,
+                        inject: true,
+                    }),
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("main.css");
+            should(js).findString(`require("fuse-box-css")("main.css");`);
+        });
+    }
 
-        "Should create a CSS File with a custom injector"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "h1 {}",
-                    },
-                    plugins: [
-                        CSSPlugin({
-                            outFile: (file) => `${tmp}/${file}`,
-                            inject: (file) => `custom/${file}`,
-                        }),
-                    ],
-                    instructions: "> index.ts",
+    "Should create a CSS File with a custom injector"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "h1 {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("main.css");
-                should(js).findString(`require("fuse-box-css")("custom/main.css");`);
-            });
-        }
+                plugins: [
+                    CSSPlugin({
+                        outFile: (file) => `${tmp}/${file}`,
+                        inject: (file) => `custom/${file}`,
+                    }),
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("main.css");
+            should(js).findString(`require("fuse-box-css")("custom/main.css");`);
+        });
+    }
 
-        "Should bundle and inline 2 CSS files into one"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.css"); require("./b.css") }`,
-                        "a.css": "body {};",
-                        "b.css": "h1 {};",
-                    },
-                    plugins: [CSSPlugin({ group: "app.css" })],
-                    instructions: "> index.ts",
+    "Should bundle and inline 2 CSS files into one"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.css"); require("./b.css") }`,
+                    "a.css": "body {};",
+                    "b.css": "h1 {};",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                should(js).findString(`require("fuse-box-css")("app.css", "body {};\\nh1 {};");`);
-            });
-        }
+                plugins: [CSSPlugin({ group: "app.css" })],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            should(js).findString(`require("fuse-box-css")("app.css", "body {};\\nh1 {};");`);
+        });
+    }
 
-        "Should bundle and write 2 CSS files into one"() {
-            makeTestFolder();
+    "Should bundle and write 2 CSS files into one"() {
+        makeTestFolder();
 
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.css"); require("./b.css") }`,
-                        "a.css": "body {};",
-                        "b.css": "h1 {};",
-                    },
-                    plugins: [CSSPlugin({ group: "app.css", outFile: `${tmp}/app.css` })],
-                    instructions: "> index.ts",
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.css"); require("./b.css") }`,
+                    "a.css": "body {};",
+                    "b.css": "h1 {};",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                const contents = shouldExist("app.css");
-                should(contents)
-                    .findString("body {};")
-                    .findString("h1 {};")
-                    .findString("/*# sourceMappingURL=app.css.map */")
+                plugins: [CSSPlugin({ group: "app.css", outFile: `${tmp}/app.css` })],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            const contents = shouldExist("app.css");
+            should(contents)
+                .findString("body {};")
+                .findString("h1 {};")
+                .findString("/*# sourceMappingURL=app.css.map */")
 
-                shouldExist("app.css.map");
-                should(js).findString(`require("fuse-box-css")("app.css");`);
-            });
-        }
+            shouldExist("app.css.map");
+            should(js).findString(`require("fuse-box-css")("app.css");`);
+        });
+    }
 
-        "Should bundle and write 2 CSS files into one but not inject it"() {
-            makeTestFolder();
+    "Should bundle and write 2 CSS files into one but not inject it"() {
+        makeTestFolder();
 
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.css"); require("./b.css") }`,
-                        "a.css": "body {};",
-                        "b.css": "h1 {};",
-                    },
-                    plugins: [CSSPlugin({ group: "app.css", outFile: `${tmp}/app.css`, inject: false })],
-                    instructions: "> index.ts",
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.css"); require("./b.css") }`,
+                    "a.css": "body {};",
+                    "b.css": "h1 {};",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("app.css");
-                should(js).notFindString(`require("fuse-box-css")("app.css");`);
-            });
-        }
+                plugins: [CSSPlugin({ group: "app.css", outFile: `${tmp}/app.css`, inject: false })],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("app.css");
+            should(js).notFindString(`require("fuse-box-css")("app.css");`);
+        });
+    }
 
-        "Should bundle and write 2 CSS files into one and inject with a custom injector"() {
-            makeTestFolder();
+    "Should bundle and write 2 CSS files into one and inject with a custom injector"() {
+        makeTestFolder();
 
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.css"); require("./b.css") }`,
-                        "a.css": "body {};",
-                        "b.css": "h1 {};",
-                    },
-                    plugins: [
-                        CSSPlugin({
-                            group: "app.css",
-                            outFile: `${tmp}/app.css`,
-                            inject: (file) => `custom/${file}`,
-                        }),
-                    ],
-                    instructions: "> index.ts",
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.css"); require("./b.css") }`,
+                    "a.css": "body {};",
+                    "b.css": "h1 {};",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                shouldExist("app.css");
-                should(js).findString(`require("fuse-box-css")("custom/app.css");`);
-            });
-        }
+                plugins: [
+                    CSSPlugin({
+                        group: "app.css",
+                        outFile: `${tmp}/app.css`,
+                        inject: (file) => `custom/${file}`,
+                    }),
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            shouldExist("app.css");
+            should(js).findString(`require("fuse-box-css")("custom/app.css");`);
+        });
+    }
 
-        "A simple case should with the the CSSResourcePlugin"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `exports.hello = { bar : require("./main.css") }`,
-                        "main.css": "body {}",
-                    },
-                    plugins: [
-                        [CSSResourcePlugin({ inline: true }), CSSPlugin()],
-                    ],
-                    instructions: "> index.ts",
+    "A simple case should with the the CSSResourcePlugin"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `exports.hello = { bar : require("./main.css") }`,
+                    "main.css": "body {}",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                should(js).findString(`require("fuse-box-css")("main.css", "body {}")`);
-            });
-        }
-        // failing here....
-        "Should with the SassPlugin"() {
-            makeTestFolder();
+                plugins: [
+                    [CSSResourcePlugin({ inline: true }), CSSPlugin()],
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            should(js).findString(`require("fuse-box-css")("main.css", "body {}")`);
+        });
+    }
+    // failing here....
+    "Should with the SassPlugin"() {
+        makeTestFolder();
 
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.scss"); require("./b.scss") }`,
-                        "a.scss": "body {color:red};",
-                        "b.scss": "h1 {color:red};",
-                    },
-                    plugins: [
-                        [SassPlugin(), CSSPlugin({ group: `all.css` })],
-                    ],
-                    instructions: "> index.ts",
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.scss"); require("./b.scss") }`,
+                    "a.scss": "body {color:red};",
+                    "b.scss": "h1 {color:red};",
                 },
-            }).then((result) => {
+                plugins: [
+                    [SassPlugin(), CSSPlugin({ group: `all.css` })],
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
 
-                const js = result.projectContents.toString();
-                should(js).findString(`require("fuse-box-css")("all.css", "`);
-            });
-        }
+            const js = result.projectContents.toString();
+            should(js).findString(`require("fuse-box-css")("all.css", "`);
+        });
+    }
 
-        "Should with the SassPlugin + CSSResourcePlugin"() {
-            makeTestFolder();
-            return createEnv({
-                project: {
-                    files: {
-                        "index.ts": `require("./a.scss"); require("./b.scss") }`,
-                        "a.scss": "body {color:red};",
-                        "b.scss": "h1 {color:red};",
-                    },
-                    plugins: [
-                        [SassPlugin(), CSSResourcePlugin({ inline: true }), CSSPlugin({ group: `all.css` })],
-                    ],
-                    instructions: "> index.ts",
+    "Should with the SassPlugin + CSSResourcePlugin"() {
+        makeTestFolder();
+        return createEnv({
+            project: {
+                files: {
+                    "index.ts": `require("./a.scss"); require("./b.scss") }`,
+                    "a.scss": "body {color:red};",
+                    "b.scss": "h1 {color:red};",
                 },
-            }).then((result) => {
-                const js = result.projectContents.toString();
-                should(js).findString(`require("fuse-box-css")("all.css", "`);
-            });
-        }
+                plugins: [
+                    [SassPlugin(), CSSResourcePlugin({ inline: true }), CSSPlugin({ group: `all.css` })],
+                ],
+                instructions: "> index.ts",
+            },
+        }).then((result) => {
+            const js = result.projectContents.toString();
+            should(js).findString(`require("fuse-box-css")("all.css", "`);
+        });
+    }
 
-        "Should allow overrides of .css extensions"() {
-            return FuseTestEnv.create({
-                project: {
-                    plugins: [CSSPlugin()],
-                    extensionOverrides: ['.foo.css'],
-                    files: {
-                        "index.ts": `import './main.css'`,
-                        "main.css": `html { background: red; }`,
-                        "main.foo.css": `html { background: blue; }`
-                    }
-                }
-            }).simple().then((env) => env.browser((window) => {
-                should(window.document.querySelectorAll('style')).haveLength(1);
-                should(window.document.querySelector('style').attributes.id.value).equal("main-css");
-                should(window.document.querySelector('style').innerHTML).equal('html { background: blue; }');
-            }));
-        }
-
+    "Should allow overrides of .css extensions"() {
+      return FuseTestEnv.create({
+          project: {
+            plugins: [CSSPlugin()],
+            extensionOverrides: ['.foo.css'],
+            files: {
+                "index.ts": `import './main.css'`,
+                "main.css": `html { background: red; }`,
+                "main.foo.css": `html { background: blue; }`
+            }
+          }
+        }).simple().then((env) => env.browser((window) => {
+          should(window.document.querySelectorAll('style')).haveLength(1);
+          should(window.document.querySelector('style').attributes.id.value).equal("main-css");
+          should(window.document.querySelector('style').innerHTML).equal('html { background: blue; }');
+        }));
+    }
+    
     "Should allow for variables to be aliased"() {
         return FuseTestEnv.create({
             project: {
@@ -317,3 +317,4 @@ export class CssPluginTest {
         }));
     }
 }
+    
